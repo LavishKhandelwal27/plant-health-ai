@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Health Analyzer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #050A0D;
+      --card: rgba(10, 22, 25, 0.75);
+      --green: #39FF88;
+      --emerald: #18C77C;
+      --cyan: #35D9FF;
+      --yellow: #FFD65A;
+      --red: #FF5E68;
+      --text: #F4FFF8;
+      --muted: #91A9A0;
+      --border: rgba(57, 255, 136, 0.16);
+      --shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -5;
+      background:
+        linear-gradient(rgba(57,255,136,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(53,217,255,0.032) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black, transparent 75%);
+    }
+
+    .glow {
+      position: fixed;
+      width: 520px;
+      height: 520px;
+      border-radius: 999px;
+      filter: blur(95px);
+      opacity: 0.22;
+      z-index: -4;
+      pointer-events: none;
+    }
+
+    .glow.one {
+      background: var(--green);
+      top: -160px;
+      left: -130px;
+    }
+
+    .glow.two {
+      background: var(--cyan);
+      bottom: 5%;
+      right: -180px;
+    }
+
+    .particle {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(57,255,136,0.5);
+      box-shadow: 0 0 18px rgba(57,255,136,0.9);
+      pointer-events: none;
+      z-index: -3;
+      animation: floatParticle 9s linear infinite;
+    }
+
+    @keyframes floatParticle {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      20%, 80% {
+        opacity: 1;
+      }
+
+      to {
+        transform: translateY(-140px);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 110px 0;
+    }
+
+    .section.compact {
+      padding: 45px 0;
+    }
+
+    .section-head {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 58px;
+    }
+
+    .section-head h2 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+      margin-top: 18px;
+    }
+
+    .section-head p {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      background: rgba(57,255,136,0.08);
+      border: 1px solid rgba(57,255,136,0.18);
+      box-shadow: 0 0 24px rgba(57,255,136,0.07);
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .glass {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+    }
+
+    .btn {
+      border: 0;
+      cursor: pointer;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      font-weight: 800;
+      transition: 0.25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(57,255,136,0.4);
+      box-shadow: 0 14px 44px rgba(57,255,136,0.14);
+    }
+
+    .btn.primary {
+      color: #001008;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      box-shadow: 0 14px 40px rgba(57,255,136,0.18);
+    }
+
+    .btn.ghost {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .btn.red {
+      color: var(--red);
+      border-color: rgba(255,94,104,0.25);
+      background: rgba(255,94,104,0.08);
+    }
+
+    .btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .small-btn {
+      min-height: 38px;
+      padding: 0 16px;
+      font-size: 0.82rem;
+    }
+
+    /* Navbar */
+
+    .navbar {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1180px, calc(100% - 28px));
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: rgba(5,10,13,0.58);
+      border: 1px solid rgba(57,255,136,0.14);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+    }
+
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      background: radial-gradient(circle, rgba(57,255,136,0.22), rgba(57,255,136,0.04));
+      border: 1px solid rgba(57,255,136,0.25);
+      box-shadow: 0 0 28px rgba(57,255,136,0.22);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .nav-links a:hover {
+      color: var(--green);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .auth-link {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .auth-link:hover {
+      color: var(--green);
+    }
+
+    .online {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font-size: 0.84rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .online::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 16px var(--green);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: 0.35;
+        transform: scale(0.7);
+      }
+    }
+
+    /* Auth */
+
+    .auth-page {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(57,255,136,0.16), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(53,217,255,0.13), transparent 35%),
+        rgba(5,10,13,0.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-page.active {
+      display: grid;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    .auth-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(57,255,136,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(53,217,255,0.032) 1px, transparent 1px);
+      background-size: 70px 70px;
+      mask-image: radial-gradient(circle at center, black, transparent 75%);
+      pointer-events: none;
+    }
+
+    .auth-card {
+      position: relative;
+      width: min(480px, 100%);
+      padding: 34px;
+      border-radius: 34px;
+      z-index: 2;
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.4rem;
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      font-size: 1.15rem;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      min-height: 44px;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .auth-tab.active {
+      color: #001008;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      box-shadow: 0 12px 30px rgba(57,255,136,0.15);
+    }
+
+    .auth-form h2 {
+      font-size: 2rem;
+      letter-spacing: -0.06em;
+      margin-bottom: 8px;
+    }
+
+    .auth-form p {
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .auth-form label {
+      display: block;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .auth-form input {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 8px;
+      padding: 0 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      outline: none;
+      color: var(--text);
+      background: rgba(255,255,255,0.055);
+      transition: 0.25s ease;
+    }
+
+    .auth-form input:focus {
+      border-color: rgba(57,255,136,0.45);
+      box-shadow: 0 0 0 4px rgba(57,255,136,0.08);
+    }
+
+    .auth-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .auth-row a {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .check-label {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 8px;
+      margin: 0 !important;
+      color: var(--muted) !important;
+    }
+
+    .check-label input {
+      width: auto;
+      min-height: auto;
+      margin: 0;
+    }
+
+    .auth-submit {
+      width: 100%;
+      min-height: 54px;
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 18px;
+      margin-bottom: 0 !important;
+    }
+
+    .auth-switch button {
+      border: 0;
+      background: transparent;
+      color: var(--green);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .auth-message {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Hero */
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 72px;
+      padding-top: 160px;
+    }
+
+    .hero h1 {
+      margin-top: 24px;
+      font-size: clamp(3rem, 7vw, 6.7rem);
+      line-height: 0.95;
+      letter-spacing: -0.08em;
+    }
+
+    .hero h1 span,
+    .gradient {
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      margin-top: 28px;
+      max-width: 650px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.16rem);
+    }
+
+    .hero-actions {
+      margin-top: 38px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .vision-panel {
+      position: relative;
+      padding: 22px;
+      min-height: 540px;
+      overflow: hidden;
+    }
+
+    .vision-panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(from 120deg, transparent, rgba(57,255,136,0.16), transparent 30%);
+      animation: rotate 8s linear infinite;
+    }
+
+    .vision-inner {
+      position: relative;
+      height: 100%;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    @keyframes rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .vision-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 3;
+    }
+
+    .mini-pill {
+      color: var(--green);
+      border: 1px solid rgba(57,255,136,0.2);
+      background: rgba(57,255,136,0.08);
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+    }
+
+    .scan-box {
+      position: relative;
+      height: 390px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at center, rgba(57,255,136,0.14), transparent 56%),
+        rgba(0,0,0,0.25);
+      border: 1px solid rgba(57,255,136,0.16);
+      box-shadow: inset 0 0 50px rgba(57,255,136,0.07);
+    }
+
+    .leaf-art {
+      width: 220px;
+      height: 310px;
+      border-radius: 60% 0 60% 0;
+      transform: rotate(-22deg);
+      background:
+        linear-gradient(135deg, rgba(244,255,248,0.16), transparent 42%),
+        linear-gradient(135deg, #1cff7d, #0d7e50 72%);
+      box-shadow: 0 0 80px rgba(57,255,136,0.35);
+      position: relative;
+    }
+
+    .leaf-art::before {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 86%;
+      left: 50%;
+      top: 8%;
+      background: rgba(244,255,248,0.45);
+      border-radius: 10px;
+      transform: translateX(-50%);
+    }
+
+    .leaf-art::after {
+      content: "";
+      position: absolute;
+      width: 105%;
+      height: 105%;
+      inset: -2%;
+      border-radius: inherit;
+      background:
+        linear-gradient(35deg, transparent 45%, rgba(255,255,255,0.24) 46%, transparent 47%),
+        linear-gradient(-35deg, transparent 48%, rgba(255,255,255,0.15) 49%, transparent 50%);
+      opacity: 0.65;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--green), var(--cyan), transparent);
+      box-shadow: 0 0 34px var(--green);
+      animation: scan 2.4s ease-in-out infinite;
+      z-index: 4;
+    }
+
+    @keyframes scan {
+      0%, 100% {
+        top: 8%;
+      }
+
+      50% {
+        top: 88%;
+      }
+    }
+
+    .corner {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border-color: var(--green);
+      opacity: 0.8;
+      z-index: 5;
+    }
+
+    .corner.tl {
+      top: 24px;
+      left: 24px;
+      border-top: 2px solid;
+      border-left: 2px solid;
+    }
+
+    .corner.tr {
+      top: 24px;
+      right: 24px;
+      border-top: 2px solid;
+      border-right: 2px solid;
+    }
+
+    .corner.bl {
+      bottom: 24px;
+      left: 24px;
+      border-bottom: 2px solid;
+      border-left: 2px solid;
+    }
+
+    .corner.br {
+      bottom: 24px;
+      right: 24px;
+      border-bottom: 2px solid;
+      border-right: 2px solid;
+    }
+
+    /* Stats */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .stat {
+      padding: 28px;
+      transition: 0.25s ease;
+    }
+
+    .stat:hover {
+      transform: translateY(-4px);
+      border-color: rgba(57,255,136,0.32);
+    }
+
+    .stat p {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 2.2rem;
+      letter-spacing: -0.05em;
+      color: var(--green);
+      text-shadow: 0 0 28px rgba(57,255,136,0.22);
+    }
+
+    /* Upload */
+
+    .upload-zone {
+      padding: 36px;
+      min-height: 440px;
+      border-radius: 34px;
+      border: 1px dashed rgba(57,255,136,0.32);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(57,255,136,0.12), transparent 45%),
+        var(--card);
+      box-shadow: var(--shadow), inset 0 0 60px rgba(57,255,136,0.035);
+      backdrop-filter: blur(20px);
+      transition: 0.25s ease;
+    }
+
+    .upload-zone.dragging {
+      transform: scale(1.01);
+      border-color: var(--green);
+      box-shadow: 0 0 80px rgba(57,255,136,0.17);
+    }
+
+    .upload-empty {
+      height: 100%;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+
+    .upload-icon {
+      width: 82px;
+      height: 82px;
+      border-radius: 26px;
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      color: var(--green);
+      background: rgba(57,255,136,0.08);
+      border: 1px solid rgba(57,255,136,0.2);
+      box-shadow: 0 0 44px rgba(57,255,136,0.14);
+    }
+
+    .upload-empty h3 {
+      font-size: 1.8rem;
+      letter-spacing: -0.04em;
+    }
+
+    .upload-empty p,
+    .upload-meta {
+      color: var(--muted);
+    }
+
+    .upload-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+    }
+
+    .preview {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .preview-image,
+    .result-image {
+      position: relative;
+      overflow: hidden;
+      border-radius: 26px;
+      border: 1px solid rgba(57,255,136,0.18);
+      background: rgba(0,0,0,0.25);
+      min-height: 360px;
+    }
+
+    .preview-image img,
+    .result-image img {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-image::after,
+    .result-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(57,255,136,0.08) 50%, transparent 100%);
+      height: 35%;
+      animation: scan 2.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .preview-info h3 {
+      margin: 18px 0 8px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+      word-break: break-word;
+    }
+
+    .preview-info p {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .preview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .analyze-btn {
+      width: 100%;
+      min-height: 58px;
+      font-size: 1rem;
+    }
+
+    .error {
+      color: var(--red);
+      margin-top: 18px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    /* Processing */
+
+    .processing {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(57,255,136,0.14), transparent 38%),
+        radial-gradient(circle at 80% 70%, rgba(53,217,255,0.12), transparent 36%),
+        rgba(5,10,13,0.98);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 26px;
+    }
+
+    .processing.active {
+      display: flex;
+      animation: fadeIn 0.35s ease both;
+    }
+
+    .processing-card {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 44px;
+      align-items: center;
+    }
+
+    .processing-image {
+      position: relative;
+      border-radius: 34px;
+      padding: 16px;
+      background: rgba(10,22,25,0.72);
+      border: 1px solid rgba(57,255,136,0.22);
+      box-shadow: 0 0 90px rgba(57,255,136,0.14);
+      overflow: hidden;
+    }
+
+    .processing-image img {
+      width: 100%;
+      height: 460px;
+      object-fit: cover;
+      border-radius: 24px;
+      display: block;
+      filter: saturate(1.08) contrast(1.05);
+    }
+
+    .beam {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      height: 90px;
+      background: linear-gradient(180deg, transparent, rgba(57,255,136,0.25), transparent);
+      border-top: 2px solid var(--cyan);
+      border-bottom: 2px solid var(--green);
+      box-shadow: 0 0 44px rgba(57,255,136,0.35);
+      animation: beamMove 1.45s ease-in-out infinite;
+    }
+
+    @keyframes beamMove {
+      0%, 100% {
+        top: 8%;
+      }
+
+      50% {
+        top: 76%;
+      }
+    }
+
+    .float-label {
+      position: absolute;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--green);
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      background: rgba(5,10,13,0.74);
+      border: 1px solid rgba(57,255,136,0.2);
+      box-shadow: 0 0 24px rgba(57,255,136,0.13);
+      animation: labelFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes labelFloat {
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .l1 { top: 8%; left: 8%; }
+    .l2 { top: 22%; right: 7%; color: var(--cyan); border-color: rgba(53,217,255,0.25); }
+    .l3 { bottom: 20%; left: 6%; }
+    .l4 { bottom: 9%; right: 7%; color: var(--cyan); border-color: rgba(53,217,255,0.25); }
+    .l5 { top: 50%; right: 2%; }
+
+    .processing-copy h2 {
+      font-size: clamp(2.2rem, 5vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.07em;
+    }
+
+    .processing-copy p {
+      color: var(--muted);
+      margin: 18px 0 34px;
+      font-size: 1.05rem;
+      max-width: 610px;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+
+    .circle-progress {
+      --value: 0;
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) calc(var(--value) * 1%), rgba(255,255,255,0.07) 0);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 50px rgba(57,255,136,0.12);
+      position: relative;
+    }
+
+    .circle-progress::before {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      border-radius: 50%;
+      background: #071114;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .circle-progress span {
+      position: relative;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.06em;
+    }
+
+    .stage {
+      color: var(--green);
+      font-weight: 900;
+      font-size: 1.1rem;
+    }
+
+    .bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      box-shadow: 0 0 22px rgba(57,255,136,0.4);
+      transition: width 0.18s linear;
+    }
+
+    /* Results */
+
+    #results {
+      display: none;
+    }
+
+    #results.show {
+      display: block;
+      animation: fadeIn 0.45s ease both;
+    }
+
+    .result-hero {
+      display: grid;
+      grid-template-columns: 1fr 0.85fr;
+      gap: 34px;
+      align-items: stretch;
+    }
+
+    .health-card {
+      padding: 34px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .health-gauge {
+      --score: 84;
+      --color: var(--green);
+      width: min(290px, 70vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--color) calc(var(--score) * 1%), rgba(255,255,255,0.07) 0);
+      box-shadow: 0 0 70px rgba(57,255,136,0.13);
+      position: relative;
+    }
+
+    .health-gauge::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background: #071114;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .health-gauge-inner {
+      position: relative;
+    }
+
+    .health-gauge small {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+    }
+
+    .health-gauge strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 3.7rem;
+      letter-spacing: -0.09em;
+    }
+
+    .health-card h3 {
+      margin-top: 24px;
+      font-size: 1.65rem;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 26px;
+      margin-top: 28px;
+    }
+
+    .panel {
+      padding: 30px;
+    }
+
+    .panel h3 {
+      font-size: 1.35rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+    }
+
+    .diagnosis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .metric-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .metric-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .metric-box strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.2rem;
+    }
+
+    .disclaimer {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .marker {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--yellow);
+      box-shadow: 0 0 22px rgba(255,214,90,0.38);
+      z-index: 6;
+    }
+
+    .marker.a { top: 29%; left: 34%; }
+    .marker.b { top: 48%; left: 58%; width: 30px; height: 30px; }
+    .marker.c { top: 63%; left: 43%; width: 24px; height: 24px; }
+
+    .progress-item {
+      margin-bottom: 18px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.92rem;
+      margin-bottom: 8px;
+    }
+
+    .mini-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      overflow: hidden;
+    }
+
+    .mini-bar span {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--emerald), var(--cyan));
+      box-shadow: 0 0 22px rgba(57,255,136,0.18);
+      animation: grow 1s ease both;
+    }
+
+    @keyframes grow {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: var(--w);
+      }
+    }
+
+    .observations li {
+      list-style: none;
+      padding: 14px 0;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      gap: 12px;
+    }
+
+    .observations li::before {
+      content: "✦";
+      color: var(--green);
+      text-shadow: 0 0 14px var(--green);
+    }
+
+    .care-grid,
+    .param-grid,
+    .care-category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .care-card,
+    .param-card,
+    .category-card,
+    .history-card {
+      padding: 24px;
+      transition: 0.25s ease;
+    }
+
+    .care-card:hover,
+    .param-card:hover,
+    .category-card:hover,
+    .history-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(57,255,136,0.3);
+    }
+
+    .care-card h3,
+    .param-card h3 {
+      margin-bottom: 10px;
+      letter-spacing: -0.03em;
+    }
+
+    .care-card p,
+    .param-card p,
+    .category-card p {
+      color: var(--muted);
+    }
+
+    .priority,
+    .summary-card {
+      margin-top: 24px;
+      padding: 30px;
+      background:
+        linear-gradient(135deg, rgba(57,255,136,0.11), rgba(53,217,255,0.07)),
+        var(--card);
+      border-color: rgba(57,255,136,0.24);
+    }
+
+    .summary-card h3 {
+      font-size: 1.7rem;
+      margin-bottom: 14px;
+    }
+
+    .summary-card p {
+      color: var(--muted);
+      max-width: 900px;
+      margin-bottom: 22px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 34px;
+    }
+
+    /* History */
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filter {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .filter.active {
+      color: #001008;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+    }
+
+    .search-wrap {
+      min-width: min(100%, 360px);
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      outline: none;
+      padding: 0 18px;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .history-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 18px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(57,255,136,0.12);
+    }
+
+    .history-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 8px 0 14px;
+    }
+
+    .trend-card {
+      padding: 30px;
+      overflow: hidden;
+    }
+
+    .trend-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .trend-top h3 {
+      font-size: 1.4rem;
+    }
+
+    .trend-up {
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    svg.chart {
+      width: 100%;
+      height: 260px;
+      overflow: visible;
+    }
+
+    .chart-line {
+      fill: none;
+      stroke: url(#grad);
+      stroke-width: 4;
+      filter: drop-shadow(0 0 12px rgba(57,255,136,0.45));
+      stroke-dasharray: 900;
+      stroke-dashoffset: 900;
+      animation: draw 1.8s ease forwards;
+    }
+
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* Care + How */
+
+    .care-search {
+      width: min(680px, 100%);
+      margin: 0 auto 34px;
+    }
+
+    .care-search input {
+      width: 100%;
+      min-height: 58px;
+      border-radius: 999px;
+      border: 1px solid rgba(57,255,136,0.14);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      outline: none;
+      padding: 0 22px;
+      font-size: 1rem;
+    }
+
+    .category-card {
+      min-height: 230px;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      background:
+        linear-gradient(180deg, transparent, rgba(5,10,13,0.9)),
+        radial-gradient(circle at 20% 10%, rgba(57,255,136,0.17), transparent 38%),
+        var(--card);
+    }
+
+    .category-card .icon {
+      font-size: 2rem;
+      margin-bottom: auto;
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      background: rgba(57,255,136,0.08);
+      border: 1px solid rgba(57,255,136,0.16);
+    }
+
+    .how-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .how-grid::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), var(--cyan), transparent);
+      opacity: 0.35;
+      z-index: -1;
+    }
+
+    .step {
+      padding: 28px;
+      text-align: center;
+    }
+
+    .step strong {
+      display: block;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    footer {
+      padding: 70px 0 40px;
+      border-top: 1px solid rgba(57,255,136,0.1);
+      text-align: center;
+    }
+
+    footer .brand {
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+    }
+
+    footer p {
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin: 26px 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .bottom {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(22px);
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+
+      .nav-right .online {
+        display: none;
+      }
+
+      .hero,
+      .preview,
+      .processing-card,
+      .result-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid,
+      .care-grid,
+      .param-grid,
+      .care-category-grid,
+      .how-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dashboard-grid,
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .processing-image img {
+        height: 330px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .section {
+        padding: 82px 0;
+      }
+
+      .navbar {
+        top: 10px;
+      }
+
+      .brand {
+        font-size: 0.9rem;
+      }
+
+      .auth-link {
+        display: none;
+      }
+
+      .small-btn {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 0.76rem;
+      }
+
+      .hero {
+        padding-top: 130px;
+      }
+
+      .vision-panel {
+        min-height: 420px;
+      }
+
+      .scan-box {
+        height: 300px;
+      }
+
+      .leaf-art {
+        width: 155px;
+        height: 220px;
+      }
+
+      .stats-grid,
+      .care-grid,
+      .param-grid,
+      .care-category-grid,
+      .how-grid,
+      .diagnosis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .upload-zone {
+        padding: 22px;
+      }
+
+      .panel,
+      .trend-card,
+      .summary-card,
+      .priority,
+      .auth-card {
+        padding: 22px;
+      }
+
+      .progress-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="bg-grid"></div>
+    <div class="glow one"></div>
+    <div class="glow two"></div>
+
+    <nav class="navbar">
+      <a href="#home" class="brand">
+        <span class="logo">🍃</span>
+        Plant Health Analyzer
+      </a>
+
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#analyze">Analyze</a>
+        <a href="#history">History</a>
+        <a href="#care">Plant Care</a>
+        <a href="#about">About</a>
+      </div>
+
+      <div class="nav-right">
+        <button class="auth-link" data-auth-open="login" type="button">Login</button>
+        <button class="btn primary small-btn" data-auth-open="signup" type="button">Sign Up</button>
+        <div class="online">AI System Online</div>
+      </div>
+    </nav>
+
+    <!-- LOGIN / SIGN UP -->
+    <section id="authPage" class="auth-page">
+      <div class="auth-bg"></div>
+
+      <div class="auth-card glass">
+        <button id="closeAuth" class="auth-close" type="button">×</button>
+
+        <div class="auth-logo">
+          <span class="logo">🍃</span>
+          <strong>Plant Health Analyzer</strong>
+        </div>
+
+        <div class="auth-tabs">
+          <button id="loginTab" class="auth-tab active" type="button">Login</button>
+          <button id="signupTab" class="auth-tab" type="button">Sign Up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <h2>Welcome Back</h2>
+          <p>Login to continue your plant health analysis workspace.</p>
+
+          <label>
+            Email Address
+            <input type="email" placeholder="you@example.com" required>
+          </label>
+
+          <label>
+            Password
+            <input type="password" placeholder="Enter your password" required>
+          </label>
+
+          <div class="auth-row">
+            <label class="check-label">
+              <input type="checkbox">
+              Remember me
+            </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button class="btn primary auth-submit" type="submit">Login</button>
+
+          <p class="auth-switch">
+            New here?
+            <button type="button" data-switch-auth="signup">Create an account</button>
+          </p>
+        </form>
+
+        <form id="signupForm" class="auth-form hidden">
+          <h2>Create Account</h2>
+          <p>Sign up to save reports, history and plant health trends.</p>
+
+          <label>
+            Full Name
+            <input type="text" placeholder="Your name" required>
+          </label>
+
+          <label>
+            Email Address
+            <input type="email" placeholder="you@example.com" required>
+          </label>
+
+          <label>
+            Password
+            <input type="password" placeholder="Create a password" required>
+          </label>
+
+          <label>
+            Confirm Password
+            <input type="password" placeholder="Confirm password" required>
+          </label>
+
+          <button class="btn primary auth-submit" type="submit">Create Account</button>
+
+          <p class="auth-switch">
+            Already have an account?
+            <button type="button" data-switch-auth="login">Login instead</button>
+          </p>
+        </form>
+
+        <p id="authMessage" class="auth-message"></p>
+      </div>
+    </section>
+
+    <main>
+      <!-- HERO -->
+      <section id="home" class="container section hero">
+        <div class="fade-up">
+          <div class="badge">AI-Powered Plant Diagnostics</div>
+          <h1>
+            See What Your Plant<br>
+            Is Trying To <span class="gradient">Tell You.</span>
+          </h1>
+          <p>
+            Upload a photo of a leaf and let the analyzer examine its visual health,
+            identify possible diseases, estimate severity and provide intelligent
+            care recommendations.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#analyze">Analyze a Leaf →</a>
+            <a class="btn ghost" href="#how">How It Works</a>
+          </div>
+        </div>
+
+        <div class="vision-panel glass fade-up">
+          <div class="vision-inner">
+            <div class="vision-row">
+              <span>Vision Engine Active</span>
+              <span class="mini-pill">84% Health</span>
+            </div>
+
+            <div class="scan-box">
+              <div class="corner tl"></div>
+              <div class="corner tr"></div>
+              <div class="corner bl"></div>
+              <div class="corner br"></div>
+              <div class="scan-line"></div>
+              <div class="leaf-art"></div>
+            </div>
+
+            <div class="vision-row">
+              <span>● Leaf Detected</span>
+              <span>Pattern Map Online</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK STATS -->
+      <section class="container section compact">
+        <div class="stats-grid">
+          <div class="stat glass">
+            <p>AI Accuracy</p>
+            <strong><span data-count="94">0</span>.8%</strong>
+          </div>
+
+          <div class="stat glass">
+            <p>Conditions Recognized</p>
+            <strong><span data-count="38">0</span>+</strong>
+          </div>
+
+          <div class="stat glass">
+            <p>Analysis Time</p>
+            <strong>&lt; 5 sec</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- UPLOAD -->
+      <section id="analyze" class="container section">
+        <div class="section-head">
+          <div class="badge">Plant Vision Engine</div>
+          <h2>AI Plant Health Analysis</h2>
+          <p>Upload a clear image of a leaf to begin intelligent visual analysis.</p>
+        </div>
+
+        <div id="uploadZone" class="upload-zone">
+          <input id="fileInput" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>
+
+          <div id="uploadEmpty" class="upload-empty">
+            <div class="upload-icon">⬆</div>
+            <h3>Drop your leaf image here</h3>
+            <p>or click to browse</p>
+            <div class="upload-meta">
+              <span>Supported: JPG, JPEG, PNG, WEBP</span>
+              <span>Maximum: 10 MB</span>
+            </div>
+            <button class="btn primary" type="button">Choose Image</button>
+          </div>
+
+          <div id="previewBox" class="preview" style="display:none;">
+            <div class="preview-image">
+              <img id="previewImg" alt="Uploaded leaf preview">
+              <div class="marker a"></div>
+              <div class="marker b"></div>
+            </div>
+
+            <div class="preview-info">
+              <div class="badge">Image Ready</div>
+              <h3 id="fileName">leaf.jpg</h3>
+              <p id="fileMeta">0 MB · 0×0px</p>
+
+              <div class="preview-actions">
+                <button id="replaceBtn" class="btn ghost" type="button">↻ Replace Image</button>
+                <button id="removeBtn" class="btn red" type="button">✕ Remove Image</button>
+              </div>
+
+              <button id="analyzeBtn" class="btn primary analyze-btn" type="button" disabled>
+                ✨ Analyze Leaf Health
+              </button>
+
+              <p class="disclaimer">
+                Demo mode: analysis values are realistic mock estimates until a real plant disease model is connected.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p id="uploadError" class="error"></p>
+      </section>
+
+      <!-- PROCESSING SCREEN -->
+      <div id="processing" class="processing">
+        <div class="processing-card">
+          <div class="processing-image">
+            <img id="processingImg" alt="Processing leaf">
+            <div class="beam"></div>
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <span class="float-label l1">LEAF DETECTED</span>
+            <span class="float-label l2">COLOR MAP</span>
+            <span class="float-label l3">TEXTURE SCAN</span>
+            <span class="float-label l4">PATTERN ANALYSIS</span>
+            <span class="float-label l5">VISION ACTIVE</span>
+          </div>
+
+          <div class="processing-copy">
+            <div class="badge">Live Analysis</div>
+            <h2>Analyzing your plant</h2>
+            <p>Our vision engine is examining your leaf for visual health indicators.</p>
+
+            <div class="progress-row">
+              <div id="circleProgress" class="circle-progress">
+                <span id="progressText">0%</span>
+              </div>
+
+              <div>
+                <div id="stageText" class="stage">Initializing Vision Engine…</div>
+                <p style="margin:10px 0 0;">Scanning visual patterns, texture, color and suspicious areas.</p>
+              </div>
+            </div>
+
+            <div class="bar">
+              <span id="progressBar"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <section id="results" class="container section">
+        <div class="section-head">
+          <div class="badge">Analysis Complete</div>
+          <h2>Analysis Complete</h2>
+          <p>Visual estimates generated in demo mode for interface preview.</p>
+        </div>
+
+        <div class="result-hero">
+          <div class="result-image glass">
+            <img id="resultImg" alt="Analyzed leaf">
+            <div class="marker a"></div>
+            <div class="marker b"></div>
+            <div class="marker c"></div>
+          </div>
+
+          <div class="health-card glass">
+            <div id="healthGauge" class="health-gauge">
+              <div class="health-gauge-inner">
+                <small>HEALTH SCORE</small>
+                <strong>84</strong>
+                <small>/ 100</small>
+              </div>
+            </div>
+            <h3>Good Condition</h3>
+            <p class="disclaimer">80–100 Green · 60–79 Yellow · 40–59 Orange · 0–39 Red</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel glass">
+            <h3>AI Diagnosis</h3>
+
+            <div class="diagnosis-grid">
+              <div class="metric-box">
+                <span>Possible Condition</span>
+                <strong>Leaf Spot</strong>
+              </div>
+              <div class="metric-box">
+                <span>Confidence</span>
+                <strong>94%</strong>
+              </div>
+              <div class="metric-box">
+                <span>Severity</span>
+                <strong>Mild</strong>
+              </div>
+              <div class="metric-box">
+                <span>Affected Area</span>
+                <strong>12%</strong>
+              </div>
+              <div class="metric-box">
+                <span>Risk Level</span>
+                <strong>Moderate</strong>
+              </div>
+            </div>
+
+            <div class="progress-item" style="margin-top:22px;">
+              <div class="progress-head">
+                <span>Confidence Bar</span>
+                <span>94%</span>
+              </div>
+              <div class="mini-bar"><span style="--w:94%;"></span></div>
+            </div>
+
+            <p class="disclaimer">
+              AI results are visual estimates and should not replace professional agricultural diagnosis.
+            </p>
+          </div>
+
+          <div class="panel glass">
+            <h3>Visual Analysis</h3>
+            <div id="visualMetrics"></div>
+          </div>
+        </div>
+
+        <div class="panel glass" style="margin-top:28px;">
+          <h3>AI Observations</h3>
+          <ul class="observations">
+            <li>Mild brown spotting detected on portions of the leaf.</li>
+            <li>Slight yellow discoloration appears near affected regions.</li>
+            <li>Overall leaf structure remains healthy.</li>
+            <li>No significant wilting is visible.</li>
+            <li>Visual symptoms may indicate an early-stage leaf condition.</li>
+          </ul>
+        </div>
+
+        <section class="section compact">
+          <div class="section-head" style="margin-bottom:34px;">
+            <h2>Recommended Care</h2>
+          </div>
+
+          <div class="care-grid">
+            <div class="care-card glass">
+              <h3>💧 Watering</h3>
+              <p>Maintain consistent soil moisture and avoid overwatering.</p>
+            </div>
+
+            <div class="care-card glass">
+              <h3>☀️ Light</h3>
+              <p>Provide adequate natural or indirect sunlight.</p>
+            </div>
+
+            <div class="care-card glass">
+              <h3>✂️ Plant Care</h3>
+              <p>Remove heavily affected leaves if symptoms spread.</p>
+            </div>
+
+            <div class="care-card glass">
+              <h3>🌱 Treatment</h3>
+              <p>Monitor symptoms and consider an appropriate treatment if the condition continues.</p>
+            </div>
+          </div>
+
+          <div class="priority glass">
+            <h3>Priority Recommendation</h3>
+            <p>
+              Monitor the plant over the next 3–5 days and avoid keeping leaves wet for long periods.
+            </p>
+          </div>
+        </section>
+
+        <section class="section compact">
+          <div class="section-head" style="margin-bottom:34px;">
+            <h2>Health Parameters</h2>
+          </div>
+
+          <div id="paramGrid" class="param-grid"></div>
+        </section>
+
+        <div class="summary-card glass">
+          <h3>AI Summary</h3>
+          <p>
+            Your plant appears to be in generally good health. The analyzer detected mild spotting and localized
+            discoloration that may indicate an early-stage leaf condition. Continue monitoring affected areas
+            while maintaining proper watering, airflow and lighting.
+          </p>
+          <button id="carePlanBtn" class="btn primary" type="button">Generate Detailed Care Plan</button>
+        </div>
+
+        <div class="actions">
+          <button id="downloadBtn" class="btn ghost" type="button">Download Health Report</button>
+          <button id="saveBtn" class="btn primary" type="button">Save Analysis</button>
+          <button id="anotherBtn" class="btn ghost" type="button">Analyze Another Leaf</button>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section id="history" class="container section">
+        <div class="section-head">
+          <div class="badge">Saved Reports</div>
+          <h2>Analysis History</h2>
+          <p>Review previous visual plant health analyses and health score changes.</p>
+        </div>
+
+        <div class="filter-row">
+          <div class="filters">
+            <button class="filter active" data-filter="All">All</button>
+            <button class="filter" data-filter="Healthy">Healthy</button>
+            <button class="filter" data-filter="Attention">Attention</button>
+            <button class="filter" data-filter="Unhealthy">Unhealthy</button>
+            <button class="filter" data-filter="Critical">Critical</button>
+          </div>
+
+          <div class="search-wrap">
+            <input id="historySearch" type="search" placeholder="Search history…">
+          </div>
+        </div>
+
+        <div id="historyGrid" class="history-grid"></div>
+      </section>
+
+      <!-- HEALTH TREND -->
+      <section class="container section compact">
+        <div class="trend-card glass">
+          <div class="trend-top">
+            <h3>Plant Health Trend</h3>
+            <span class="trend-up">↑ 17% Health Improvement</span>
+          </div>
+
+          <svg class="chart" viewBox="0 0 900 260" role="img" aria-label="Plant health trend line chart">
+            <defs>
+              <linearGradient id="grad" x1="0" x2="1">
+                <stop offset="0%" stop-color="#39FF88"/>
+                <stop offset="100%" stop-color="#35D9FF"/>
+              </linearGradient>
+            </defs>
+            <line x1="40" y1="220" x2="860" y2="220" stroke="rgba(255,255,255,.08)" />
+            <line x1="40" y1="40" x2="40" y2="220" stroke="rgba(255,255,255,.08)" />
+            <path class="chart-line" d="M60 162 C190 145, 220 137, 260 132 C390 112, 420 104, 460 92 C600 76, 610 78, 660 64 C760 43, 790 46, 840 35" />
+            <g fill="#39FF88">
+              <circle cx="60" cy="162" r="6"/>
+              <circle cx="260" cy="132" r="6"/>
+              <circle cx="460" cy="92" r="6"/>
+              <circle cx="660" cy="64" r="6"/>
+              <circle cx="840" cy="35" r="6"/>
+            </g>
+            <g fill="#91A9A0" font-size="16" font-family="Inter">
+              <text x="42" y="248">Day 1 — 71%</text>
+              <text x="232" y="248">Day 3 — 75%</text>
+              <text x="432" y="248">Day 5 — 80%</text>
+              <text x="632" y="248">Day 7 — 84%</text>
+              <text x="780" y="248">Day 10 — 88%</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- PLANT CARE -->
+      <section id="care" class="container section">
+        <div class="section-head">
+          <div class="badge">Botanical Intelligence</div>
+          <h2>Plant Care Intelligence</h2>
+          <p>Explore care topics, common plant issues and prevention guidance.</p>
+        </div>
+
+        <div class="care-search">
+          <input type="search" placeholder="Search plants, symptoms or diseases…">
+        </div>
+
+        <div class="care-category-grid">
+          <div class="category-card glass">
+            <div class="icon">🦠</div>
+            <h3>Plant Diseases</h3>
+            <p>Identify common leaf diseases and visual symptoms.</p>
+          </div>
+
+          <div class="category-card glass">
+            <div class="icon">💧</div>
+            <h3>Watering</h3>
+            <p>Learn healthy watering rhythm and moisture balance.</p>
+          </div>
+
+          <div class="category-card glass">
+            <div class="icon">☀️</div>
+            <h3>Lighting</h3>
+            <p>Optimize natural, indirect and artificial light exposure.</p>
+          </div>
+
+          <div class="category-card glass">
+            <div class="icon">🌿</div>
+            <h3>Nutrition</h3>
+            <p>Understand nutrients, fertilization and deficiency signs.</p>
+          </div>
+
+          <div class="category-card glass">
+            <div class="icon">🐛</div>
+            <h3>Pest Control</h3>
+            <p>Detect early pest indicators and manage infestations.</p>
+          </div>
+
+          <div class="category-card glass">
+            <div class="icon">🪴</div>
+            <h3>Soil Health</h3>
+            <p>Improve drainage, airflow and soil composition.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section id="how" class="container section">
+        <div class="section-head">
+          <div class="badge">Workflow</div>
+          <h2>How It Works</h2>
+        </div>
+
+        <div class="how-grid">
+          <div class="step glass">
+            <strong>01</strong>
+            <h3>Upload Leaf</h3>
+          </div>
+
+          <div class="step glass">
+            <strong>02</strong>
+            <h3>AI Vision Analysis</h3>
+          </div>
+
+          <div class="step glass">
+            <strong>03</strong>
+            <h3>Health & Condition Detection</h3>
+          </div>
+
+          <div class="step glass">
+            <strong>04</strong>
+            <h3>Smart Care Recommendations</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="container section compact">
+        <div class="summary-card glass">
+          <h3>About Plant Health Analyzer</h3>
+          <p>
+            Plant Health Analyzer is a futuristic plant diagnostics interface built for visual leaf
+            inspection workflows. The current demo uses realistic mock analysis data and is structured so a real
+            plant disease detection API or model can replace the mock analyzer later without changing the interface.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="brand">
+          <span class="logo">🍃</span>
+          Plant Health Analyzer
+        </div>
+
+        <p>Smarter insights for healthier plants.</p>
+
+        <div class="footer-links">
+          <a href="#analyze">Analyze</a>
+          <a href="#history">History</a>
+          <a href="#care">Plant Care</a>
+          <a href="#about">About</a>
+        </div>
+
+        <div class="bottom">Plant Health Analyzer • Intelligent Plant Health Analysis</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const MAX_SIZE = 10 * 1024 * 1024;
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const allowedExt = ["jpg", "jpeg", "png", "webp"];
+
+    const uploadZone = document.getElementById("uploadZone");
+    const fileInput = document.getElementById("fileInput");
+    const uploadEmpty = document.getElementById("uploadEmpty");
+    const previewBox = document.getElementById("previewBox");
+    const previewImg = document.getElementById("previewImg");
+    const fileName = document.getElementById("fileName");
+    const fileMeta = document.getElementById("fileMeta");
+    const uploadError = document.getElementById("uploadError");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const replaceBtn = document.getElementById("replaceBtn");
+    const removeBtn = document.getElementById("removeBtn");
+
+    const processing = document.getElementById("processing");
+    const processingImg = document.getElementById("processingImg");
+    const circleProgress = document.getElementById("circleProgress");
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    const stageText = document.getElementById("stageText");
+
+    const results = document.getElementById("results");
+    const resultImg = document.getElementById("resultImg");
+    const visualMetrics = document.getElementById("visualMetrics");
+    const paramGrid = document.getElementById("paramGrid");
+    const historyGrid = document.getElementById("historyGrid");
+    const historySearch = document.getElementById("historySearch");
+
+    let uploadedImage = null;
+    let uploadedMeta = null;
+    let currentAnalysis = null;
+    let activeFilter = "All";
+
+    const stages = [
+      "Initializing Vision Engine…",
+      "Detecting leaf structure…",
+      "Analyzing color patterns…",
+      "Examining leaf texture…",
+      "Scanning for spots and lesions…",
+      "Comparing disease patterns…",
+      "Calculating health score…",
+      "Generating care recommendations…",
+      "Analysis Complete ✓"
+    ];
+
+    const visualData = [
+      ["Leaf Color", 82],
+      ["Texture Quality", 87],
+      ["Discoloration", 14],
+      ["Spot Detection", 11],
+      ["Edge Damage", 6],
+      ["Wilting Probability", 8]
+    ];
+
+    const parameterData = [
+      ["Overall Health", 84, "💚", "Good"],
+      ["Disease Risk", 36, "🛡️", "Moderate"],
+      ["Leaf Appearance", 82, "🍃", "Good"],
+      ["Leaf Damage", 12, "⚠️", "Low"],
+      ["Hydration Appearance", 88, "💧", "Stable"],
+      ["Growth Condition", 81, "🌱", "Good"]
+    ];
+
+    const defaultHistory = [
+      { id: "h1", img: leafThumb("#FFD65A"), date: "Day 1", score: 71, condition: "Nutrient Stress", severity: "Moderate" },
+      { id: "h2", img: leafThumb("#18C77C"), date: "Day 3", score: 75, condition: "Minor Discoloration", severity: "Mild" },
+      { id: "h3", img: leafThumb("#39FF88"), date: "Day 5", score: 80, condition: "Recovering", severity: "Low" },
+      { id: "h4", img: leafThumb("#39FF88"), date: "Day 7", score: 84, condition: "Leaf Spot", severity: "Mild" },
+      { id: "h5", img: leafThumb("#35D9FF"), date: "Day 10", score: 88, condition: "Healthy", severity: "Low" }
+    ];
+
+    function leafThumb(color) {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
+          <rect width="400" height="260" rx="30" fill="#071114"/>
+          <circle cx="320" cy="54" r="82" fill="${color}" opacity=".13"/>
+          <path d="M203 220C120 158 100 82 205 38c76 27 111 86 92 145-17 49-59 69-94 37Z" fill="${color}" opacity=".82"/>
+          <path d="M203 220c8-55 8-117 2-181" stroke="#F4FFF8" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+          <path d="M205 108c35-16 57-37 77-65M203 145c-34-12-58-31-83-62M203 178c30-11 52-28 75-55" stroke="#F4FFF8" stroke-width="4" stroke-linecap="round" opacity=".3"/>
+        </svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function getStatus(score) {
+      if (score >= 80) return "Healthy";
+      if (score >= 60) return "Attention";
+      if (score >= 40) return "Unhealthy";
+      return "Critical";
+    }
+
+    function getHistory() {
+      const saved = JSON.parse(localStorage.getItem("plantHealthHistory") || "[]");
+      return [...saved, ...defaultHistory];
+    }
+
+    function setError(message) {
+      uploadError.textContent = message || "";
+    }
+
+    function isValidFile(file) {
+      const ext = file.name.split(".").pop().toLowerCase();
+      return allowedTypes.includes(file.type) || allowedExt.includes(ext);
+    }
+
+    function handleFile(file) {
+      setError("");
+
+      if (!file) return;
+
+      if (!isValidFile(file)) {
+        setError("Please upload a JPG, JPEG, PNG or WEBP image.");
+        return;
+      }
+
+      if (file.size > MAX_SIZE) {
+        setError("Image is too large. Maximum file size is 10 MB.");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const img = new Image();
+
+        img.onload = () => {
+          uploadedImage = reader.result;
+          uploadedMeta = {
+            name: file.name,
+            size: file.size,
+            width: img.width,
+            height: img.height
+          };
+
+          previewImg.src = uploadedImage;
+          fileName.textContent = file.name;
+          fileMeta.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB · ${img.width}×${img.height}px`;
+
+          uploadEmpty.style.display = "none";
+          previewBox.style.display = "grid";
+          analyzeBtn.disabled = false;
+          results.classList.remove("show");
+        };
+
+        img.src = reader.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    uploadZone.addEventListener("click", (e) => {
+      if (!uploadedImage && e.target !== fileInput) fileInput.click();
+    });
+
+    fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+    uploadZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadZone.classList.add("dragging");
+    });
+
+    uploadZone.addEventListener("dragleave", () => {
+      uploadZone.classList.remove("dragging");
+    });
+
+    uploadZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove("dragging");
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    replaceBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      uploadedImage = null;
+      uploadedMeta = null;
+      currentAnalysis = null;
+      fileInput.value = "";
+      previewImg.removeAttribute("src");
+      uploadEmpty.style.display = "grid";
+      previewBox.style.display = "none";
+      analyzeBtn.disabled = true;
+      results.classList.remove("show");
+      setError("");
+    });
+
+    analyzeBtn.addEventListener("click", startProcessing);
+
+    function startProcessing() {
+      if (!uploadedImage) return;
+
+      processingImg.src = uploadedImage;
+      processing.classList.add("active");
+
+      let progress = 0;
+      const duration = 4200;
+      const interval = 40;
+      const step = 100 / (duration / interval);
+
+      const timer = setInterval(() => {
+        progress = Math.min(100, progress + step);
+        const rounded = Math.floor(progress);
+
+        circleProgress.style.setProperty("--value", rounded);
+        progressText.textContent = rounded + "%";
+        progressBar.style.width = rounded + "%";
+
+        const stageIndex = Math.min(stages.length - 1, Math.floor((rounded / 100) * stages.length));
+        stageText.textContent = stages[stageIndex];
+
+        if (progress >= 100) {
+          clearInterval(timer);
+
+          setTimeout(() => {
+            processing.classList.remove("active");
+            generateResults();
+          }, 450);
+        }
+      }, interval);
+    }
+
+    function generateResults() {
+      currentAnalysis = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        img: uploadedImage,
+        date: new Date().toLocaleString(),
+        score: 84,
+        condition: "Leaf Spot",
+        severity: "Mild",
+        confidence: 94
+      };
+
+      resultImg.src = uploadedImage;
+      renderVisualMetrics();
+      renderParameters();
+
+      results.classList.add("show");
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderVisualMetrics() {
+      visualMetrics.innerHTML = visualData.map(([label, value]) => `
+        <div class="progress-item">
+          <div class="progress-head">
+            <span>${label}</span>
+            <span>${value}%</span>
+          </div>
+          <div class="mini-bar"><span style="--w:${value}%;"></span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderParameters() {
+      paramGrid.innerHTML = parameterData.map(([label, value, icon, status]) => `
+        <div class="param-card glass">
+          <h3>${icon} ${label}</h3>
+          <p>${status}</p>
+          <strong style="display:block;margin:12px 0;color:var(--green);font-size:1.6rem;">${value}%</strong>
+          <div class="mini-bar"><span style="--w:${value}%;"></span></div>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      if (!currentAnalysis) return;
+
+      const saved = JSON.parse(localStorage.getItem("plantHealthHistory") || "[]");
+      const exists = saved.some(item => item.id === currentAnalysis.id);
+
+      if (!exists) {
+        saved.unshift(currentAnalysis);
+        localStorage.setItem("plantHealthHistory", JSON.stringify(saved.slice(0, 12)));
+      }
+
+      renderHistory();
+      alert("Analysis saved to history.");
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      if (!currentAnalysis) return;
+
+      const report = `
+Plant Health Analyzer Report
+----------------------------
+Mode: Demo mock visual estimate
+Date: ${currentAnalysis.date}
+Health Score: 84 / 100
+Condition: Leaf Spot
+Confidence: 94%
+Severity: Mild
+Affected Area: 12%
+Risk Level: Moderate
+
+Summary:
+Your plant appears to be in generally good health. The analyzer detected mild spotting and localized discoloration that may indicate an early-stage leaf condition.
+
+Disclaimer:
+AI results are visual estimates and should not replace professional agricultural diagnosis.
+      `.trim();
+
+      const blob = new Blob([report], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "plant-health-report.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("anotherBtn").addEventListener("click", () => {
+      results.classList.remove("show");
+      document.getElementById("analyze").scrollIntoView({ behavior: "smooth" });
+    });
+
+    document.getElementById("carePlanBtn").addEventListener("click", () => {
+      alert("Detailed care plan generated: monitor affected areas, improve airflow, avoid wet leaves, and reassess in 3–5 days.");
+    });
+
+    function renderHistory() {
+      const search = historySearch.value.toLowerCase();
+
+      const data = getHistory().filter(item => {
+        const status = getStatus(item.score);
+        const matchesFilter = activeFilter === "All" || status === activeFilter;
+        const matchesSearch =
+          item.condition.toLowerCase().includes(search) ||
+          item.severity.toLowerCase().includes(search) ||
+          item.date.toLowerCase().includes(search);
+
+        return matchesFilter && matchesSearch;
+      });
+
+      historyGrid.innerHTML = data.map(item => `
+        <div class="history-card glass">
+          <img src="${item.img}" alt="Leaf thumbnail">
+          <h3>${item.condition}</h3>
+          <div class="history-meta">${item.date} · ${item.severity}</div>
+          <strong style="color:${item.score >= 80 ? "#39FF88" : item.score >= 60 ? "#FFD65A" : "#FF5E68"};">
+            Health Score ${item.score}%
+          </strong>
+          <div style="margin-top:16px;">
+            <button class="btn ghost" type="button" onclick="alert('Report preview: ${item.condition} · ${item.score}% health score')">
+              View Report
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    document.querySelectorAll(".filter").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        renderHistory();
+      });
+    });
+
+    historySearch.addEventListener("input", renderHistory);
+
+    function animateCounts() {
+      document.querySelectorAll("[data-count]").forEach(el => {
+        const target = Number(el.dataset.count);
+        let start = null;
+
+        function tick(timestamp) {
+          if (!start) start = timestamp;
+          const progress = Math.min((timestamp - start) / 1300, 1);
+          el.textContent = Math.floor(progress * target).toLocaleString();
+
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function createParticles() {
+      for (let i = 0; i < 26; i++) {
+        const p = document.createElement("span");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.top = Math.random() * 100 + "vh";
+        p.style.animationDelay = Math.random() * 8 + "s";
+        p.style.animationDuration = 7 + Math.random() * 7 + "s";
+        document.body.appendChild(p);
+      }
+    }
+
+    /* Auth logic */
+    const authPage = document.getElementById("authPage");
+    const closeAuth = document.getElementById("closeAuth");
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const authMessage = document.getElementById("authMessage");
+
+    function openAuth(mode = "login") {
+      authPage.classList.add("active");
+      document.body.style.overflow = "hidden";
+      switchAuth(mode);
+    }
+
+    function closeAuthPage() {
+      authPage.classList.remove("active");
+      document.body.style.overflow = "";
+      authMessage.textContent = "";
+    }
+
+    function switchAuth(mode) {
+      authMessage.textContent = "";
+
+      if (mode === "signup") {
+        signupTab.classList.add("active");
+        loginTab.classList.remove("active");
+        signupForm.classList.remove("hidden");
+        loginForm.classList.add("hidden");
+      } else {
+        loginTab.classList.add("active");
+        signupTab.classList.remove("active");
+        loginForm.classList.remove("hidden");
+        signupForm.classList.add("hidden");
+      }
+    }
+
+    document.querySelectorAll("[data-auth-open]").forEach(button => {
+      button.addEventListener("click", () => {
+        openAuth(button.dataset.authOpen);
+      });
+    });
+
+    document.querySelectorAll("[data-switch-auth]").forEach(button => {
+      button.addEventListener("click", () => {
+        switchAuth(button.dataset.switchAuth);
+      });
+    });
+
+    loginTab.addEventListener("click", () => switchAuth("login"));
+    signupTab.addEventListener("click", () => switchAuth("signup"));
+    closeAuth.addEventListener("click", closeAuthPage);
+
+    authPage.addEventListener("click", (event) => {
+      if (event.target === authPage) {
+        closeAuthPage();
+      }
+    });
+
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      authMessage.textContent = "Login successful. Demo account session started.";
+      setTimeout(closeAuthPage, 900);
+    });
+
+    signupForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const passwords = signupForm.querySelectorAll('input[type="password"]');
+      if (passwords[0].value !== passwords[1].value) {
+        authMessage.textContent = "Passwords do not match.";
+        authMessage.style.color = "var(--red)";
+        return;
+      }
+
+      authMessage.style.color = "var(--green)";
+      authMessage.textContent = "Account created successfully. Demo session started.";
+      setTimeout(closeAuthPage, 900);
+    });
+
+    createParticles();
+    animateCounts();
+    renderHistory();
+  </script>
+</body>
+</html>
